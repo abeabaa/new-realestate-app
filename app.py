@@ -114,3 +114,4 @@ else:
 
     # st.plotly_chart()를 사용해 Streamlit 앱에 그래프를 표시합니다.
     st.plotly_chart(fig, use_container_width=True)
+
