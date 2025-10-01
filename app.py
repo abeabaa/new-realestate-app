@@ -4,10 +4,9 @@ import plotly.express as px
 
 # --- 페이지 기본 설정 ---
 # 웹 앱의 제목, 아이콘, 레이아웃을 설정합니다.
-# layout="wide"는 콘텐츠를 화면 너비에 맞게 표시해줍니다.
 st.set_page_config(
-    page_title="부동산 4분면 분석 대시보드",
-    page_icon="🏠",
+    page_title="부동산 4분면 경로 분석",
+    page_icon="📈",
     layout="wide"
 )
 
@@ -67,15 +66,10 @@ selected_regions = st.sidebar.multiselect(
     default=all_regions[:3] # 기본값: 처음 3개 지역
 )
 
-# 3. 차트 종류 선택 위젯
-chart_type = st.sidebar.radio(
-    "차트 종류 선택",
-    ('산점도 (Scatter Plot)', '경로 플롯 (Path Plot)')
-)
-
 # --- 메인 화면 ---
-st.title("🏠 부동산 매매/전세 가격 4분면 분석")
+st.title("📈 부동산 매매/전세 가격 경로 분석")
 st.markdown(f"**선택된 기간:** `{start_date.strftime('%Y-%m-%d')}` ~ `{end_date.strftime('%Y-%m-%d')}`")
+st.markdown("시간에 따른 각 지역의 부동산 가격 변화 궤적을 보여줍니다.")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
@@ -87,33 +81,21 @@ df_sel = df[mask]
 if df_sel.empty:
     st.warning("선택한 조건에 맞는 데이터가 없습니다. 다른 필터를 선택해주세요.")
 else:
-    if chart_type == '산점도 (Scatter Plot)':
-        # 산점도 그리기
-        fig = px.scatter(
-            df_sel,
-            x="매매증감률",
-            y="전세증감률",
-            color="지역",
-            hover_data=['날짜', '지역']
-        )
-        title_text = f"부동산 4분면 (산점도)"
-    else:
-        # 경로 플롯 그리기 (선을 위해 날짜순 정렬)
-        df_sel_sorted = df_sel.sort_values(by='날짜')
-        fig = px.line(
-            df_sel_sorted,
-            x="매매증감률",
-            y="전세증감률",
-            color="지역",
+    # 경로 플롯을 그리기 위해 날짜순으로 정렬
+    df_sel_sorted = df_sel.sort_values(by='날짜')
 
-            markers=True, # 각 지점에 점도 표시
-            hover_data=['날짜', '지역']
-        )
-        title_text = f"부동산 4분면 경로 (경로 플롯)"
+    fig = px.line(
+        df_sel_sorted,
+        x="매매증감률",
+        y="전세증감률",
+        color="지역",
+        markers=True, # 각 지점에 점도 함께 표시
+        hover_data=['날짜', '지역']
+    )
 
     # 공통 레이아웃 업데이트
     fig.update_layout(
-        title=title_text,
+        title="부동산 4분면 경로",
         xaxis_title="매매증감률 (%)",
         yaxis_title="전세증감률 (%)",
         height=700,
@@ -122,4 +104,3 @@ else:
 
     # st.plotly_chart로 Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
-
