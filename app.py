@@ -32,7 +32,7 @@ def load_data(file_path):
     return df
 
 # --- 파일 경로 설정 및 데이터 로딩 ---
-file_path = "20250818_주간시계열.xlsx"
+file_path = "20250922_주간시계열.xlsx"
 df = load_data(file_path)
 
 # --- 사이드바 (사용자 입력 UI) ---
@@ -102,3 +102,4 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
