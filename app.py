@@ -100,7 +100,7 @@ else:
         hover_data=['날짜', '지역'],
         labels={'날짜': '날짜'} # hover_data의 날짜 포맷팅을 위해 라벨 추가
     )
-    
+
     # 날짜 포맷을 'YYYY-MM-DD' 형식으로 깔끔하게 변경
     fig.update_traces(hovertemplate='<b>%{customdata[1]}</b><br>날짜: %{customdata[0]|%Y-%m-%d}<br>매매증감률: %{x:.3f}%<br>전세증감률: %{y:.3f}%')
 
