@@ -94,6 +94,19 @@ else:
         color_discrete_map=color_map
     )
 
+    last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
+    
+    for index, row in last_points.iterrows():
+        fig.add_annotation(
+            x=row['매매지수'],
+            y=row['전세지수'],
+            text=row['지역'],
+            showarrow=False,
+            yshift=10,
+            font=dict(size=12, color="black"),
+            bgcolor="rgba(255, 255, 255, 0.6)"
+        )
+
     fig.update_layout(
         title="부동산 4분면 경로",
         xaxis_title="매매증감률 (%)",
@@ -103,6 +116,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
