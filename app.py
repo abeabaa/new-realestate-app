@@ -94,6 +94,25 @@ else:
         color_discrete_map=color_map
     )
 
+    last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
+    
+    # 각 지역의 최종점에 지역명 텍스트 추가
+    for index, row in last_points.iterrows():
+        fig.add_annotation(
+            x=row['매매지수'],      # 텍스트를 표시할 x좌표 (매매지수)
+            y=row['전세지수'],      # 텍스트를 표시할 y좌표 (전세지수)
+            text=row['지역'],       # 표시할 텍스트 (지역명)
+            showarrow=False,       # 화살표 숨기기
+            yshift=10,             # 마커와 겹치지 않도록 텍스트를 위로 살짝 이동
+            font=dict(             # 폰트 스타일 지정 (선택사항)
+                family="Malgun Gothic",
+                size=12,
+                color="black"
+            ),
+            bgcolor="rgba(255, 255, 255, 0.5)", # 텍스트 배경 (선택사항)
+            borderpad=4                        # 텍스트 테두리 여백 (선택사항)
+        )
+
     fig.update_layout(
         title="부동산 4분면 경로",
         xaxis_title="매매증감률 (%)",
@@ -103,5 +122,6 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
