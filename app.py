@@ -67,9 +67,9 @@ selected_regions = st.sidebar.multiselect(
 # ========================= [ 수정된 부분 1: 사이드바 색상 선택 헤더 ] =========================
 # st.columns를 사용해 이미지와 텍스트를 나란히 배치합니다.
 # [1, 5]는 컬럼의 너비 비율을 의미합니다. (이미지 컬럼이 1, 텍스트 컬럼이 5)
-col1, col2 = st.sidebar.columns([1, 1])
+col1, col2 = st.sidebar.columns([1, 50])
 with col1:
-    st.image(logo_image_path, width=50) # 로고 이미지 표시 (너비 조절)
+    st.image(logo_image_path, width=10) # 로고 이미지 표시 (너비 조절)
 with col2:
     st.header("색상 지정") # st.sidebar.header 대신 st.header 사용
 
@@ -132,6 +132,7 @@ else:
         legend_title="지역"
     )
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
