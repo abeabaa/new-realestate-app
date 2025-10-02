@@ -64,24 +64,21 @@ selected_regions = st.sidebar.multiselect(
     default=list(all_regions[:5])
 )
 
-# ========================= [ 수정된 부분 1: 사이드바 색상 선택 헤더 ] =========================
-# st.columns를 사용해 이미지와 텍스트를 나란히 배치합니다.
-# [1, 5]는 컬럼의 너비 비율을 의미합니다. (이미지 컬럼이 1, 텍스트 컬럼이 5)
-col1, col2 = st.sidebar.columns([100, 1])
-with col1:
-    st.image(logo_image_path, width=30) # 로고 이미지 표시 (너비 조절)
-with col2:
-    st.header("색상 지정") # st.sidebar.header 대신 st.header 사용
-
+# --- 사용자 색상 선택 기능 ---
+st.sidebar.header("🎨 색상을 지정하세요")
 color_map = {}
+# 사용자가 선택한 각 지역에 대해 색상 선택 위젯을 동적으로 생성합니다.
 for region in selected_regions:
+    # st.color_picker는 사용자가 색상을 고를 수 있는 위젯입니다.
+    # Plotly의 기본 색상 팔레트에서 색상을 가져와 기본값으로 설정해 일관성을 높입니다.
     default_color = px.colors.qualitative.Plotly[len(color_map) % len(px.colors.qualitative.Plotly)]
     selected_color = st.sidebar.color_picker(f"'{region}' 색상", default_color)
-    color_map[region] = selected_color
+    color_map[region] = selected_color # 딕셔너리에 '지역:선택된 색상'을 저장합니다.
+
 
 # ========================= [ 수정된 부분 2: 메인 화면 타이틀 ] =========================
 # 메인 화면에서도 동일한 방법으로 로고와 제목을 나란히 배치합니다.
-col1_main, col2_main = st.columns([1, 10])
+col1_main, col2_main = st.columns([1, 1])
 with col1_main:
     try:
         st.image(logo_image_path, width=70) # 로고 이미지 표시
@@ -132,6 +129,7 @@ else:
         legend_title="지역"
     )
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
