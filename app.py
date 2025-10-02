@@ -78,7 +78,7 @@ for region in selected_regions:
 
 # ========================= [ 수정된 부분 2: 메인 화면 타이틀 ] =========================
 # 메인 화면에서도 동일한 방법으로 로고와 제목을 나란히 배치합니다.
-col1_main, col2_main = st.columns([1, 1])
+col1_main, col2_main = st.columns([1, 100])
 with col1_main:
     try:
         st.image(logo_image_path, width=70) # 로고 이미지 표시
@@ -129,6 +129,7 @@ else:
         legend_title="지역"
     )
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
