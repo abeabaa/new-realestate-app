@@ -40,6 +40,10 @@ def load_data(file_path):
 
 # --- 메인 앱 로직 ---
 
+file_path = "20250922_주간시계열.xlsx"
+df = load_data(file_path)
+
+
 # 1. 페이지 기본 설정 (제목, 레이아웃 등)
 st.set_page_config(page_title="부동산 4분면 분석", layout="wide")
 st.title("📈 부동산 4분면 경로 분석")
@@ -134,3 +138,4 @@ if uploaded_file is not None:
             st.plotly_chart(fig, use_container_width=True)
 else:
     st.info("데이터를 분석하려면 먼저 엑셀 파일을 업로드해주세요.")
+
