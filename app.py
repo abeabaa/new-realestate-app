@@ -94,30 +94,12 @@ else:
         color_discrete_map=color_map
     )
 
-for index, row in last_points.iterrows():
-    fig.add_annotation(
-        x=row['매매지수'],
-        y=row['전세지수'],
-        text=row['지역'],
-        showarrow=False,
-        yshift=10,
-        font=dict(size=12, color="black"),
-        bgcolor="rgba(255, 255, 255, 0.6)"
+    fig.update_layout(
+        title="부동산 4분면 경로",
+        xaxis_title="매매증감률 (%)",
+        yaxis_title="전세증감률 (%)",
+        height=700,
+        legend_title="지역"
     )
 
-fig.update_layout(
-    title="부동산 4분면 경로",
-    xaxis_title="매매증감률 (%)",
-    yaxis_title="전세증감률 (%)",
-    height=700,
-    legend_title="지역"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-
-
-
-
-
-
+    st.plotly_chart(fig, use_container_width=True)
