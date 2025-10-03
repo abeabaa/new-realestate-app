@@ -59,6 +59,11 @@ def load_data(uploaded_file):
 # --- Sidebar for User Inputs ---
 st.sidebar.header("⚙️ 분석 설정")
 uploaded_file = st.sidebar.file_uploader("📂 주간 시계열 엑셀 파일을 업로드하세요.", type=["xlsx"])
+# --- 파일 경로 및 로고 이미지 설정 ---
+# 🚨 app.py와 같은 폴더에 파일들이 있어야 합니다.
+excel_file_path = "20250922_주간시계열.xlsx"
+logo_image_path = "jak_logo.png" # 로고 파일 경로
+df = load_data(excel_file_path)
 
 # --- Main Application Logic ---
 if uploaded_file is not None:
@@ -154,3 +159,4 @@ if uploaded_file is not None:
             st.info("분석을 시작하려면 날짜 범위를 선택해주세요.")
 else:
     st.info("분석을 시작하려면 사이드바에서 엑셀 파일을 업로드하세요.")
+
