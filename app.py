@@ -14,8 +14,8 @@ st.set_page_config(
 def load_data(file_path):
     """엑셀 파일을 로드하고 데이터를 전처리하는 함수"""
     try:
-        sale = pd.read_excel(file_path, sheet_name="1.매매증감", skiprows=[0, 2, 3])
-        rent = pd.read_excel(file_path, sheet_name="2.전세증감", skiprows=[0, 2, 3])
+        sale = pd.read_excel(file_path, sheet_name="3.매매지수", skiprows=[0, 2, 3])
+        rent = pd.read_excel(file_path, sheet_name="4.전세지수수", skiprows=[0, 2, 3])
     except FileNotFoundError:
         st.error(f"'{file_path}' 파일을 찾을 수 없습니다. app.py와 같은 폴더에 엑셀 파일을 넣어주세요.")
         st.stop()
@@ -102,8 +102,8 @@ else:
     df_sel_sorted = df_sel.sort_values(by='날짜')
     fig = px.line(
         df_sel_sorted,
-        x="매매증감률",
-        y="전세증감률",
+        x="매매지수",
+        y="전세지수",
         color="지역",
         markers=True,
         hover_data={'날짜': '|%Y-%m-%d', '지역': True},
@@ -112,8 +112,8 @@ else:
     last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
     for index, row in last_points.iterrows():
         fig.add_annotation(
-            x=row['매매증감률'],
-            y=row['전세증감률'],
+            x=row['매매지수'],
+            y=row['전세지수'],
             text=row['지역'],
             showarrow=False,
             yshift=10,
@@ -123,12 +123,13 @@ else:
         )
     fig.update_layout(
         title="부동산 4분면 경로",
-        xaxis_title="매매증감률 (%)",
-        yaxis_title="전세증감률 (%)",
+        xaxis_title="매매지수",
+        yaxis_title="전세지수",
         height=700,
         legend_title="지역"
     )
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
