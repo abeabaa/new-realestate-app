@@ -7,7 +7,7 @@ from IPython.display import display
 # --- 1. 파일 불러오기 및 데이터 전처리 ---
 # 파일 경로를 원래대로 직접 지정합니다.
 # 이 경로에 분석할 엑셀 파일이 있어야 합니다.
-file_path = "C:/Users/terra/OneDrive/바탕 화면/부동산4분면/20250818_주간시계열.xlsx"
+file_path = "20250922_주간시계열.xlsx"
 
 try:
     # 매매지수와 전세지수 데이터를 엑셀 파일에서 읽어옵니다.
@@ -142,3 +142,4 @@ except FileNotFoundError:
     print(f"오류: '{file_path}' 경로에서 파일을 찾을 수 없습니다. 파일 경로를 확인해주세요.")
 except Exception as e:
     print(f"데이터를 처리하는 중 오류가 발생했습니다: {e}")
+
