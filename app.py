@@ -41,7 +41,7 @@ def load_data(file_path):
 
 # --- ⚙️ 중요: 파일 경로를 상대 경로로 변경 ---
 # 로컬 컴퓨터 경로 대신 파일 이름만 사용합니다.
-file_path = "20250818_주간시계열.xlsx"
+file_path = "20250922_주간시계열.xlsx"
 df = load_data(file_path)
 
 # --- 사이드바 (사용자 입력 UI) ---
@@ -120,3 +120,4 @@ else:
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
+
