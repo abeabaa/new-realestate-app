@@ -67,7 +67,7 @@ df = load_data(excel_file_path)
 
 # --- Main Application Logic ---
 if uploaded_file is not None:
-    df = load_data(uploaded_file)
+    df = load_data(excel_file_path)
 
     if df is not None and not df.empty:
         # Get unique regions and default selections.
@@ -159,4 +159,5 @@ if uploaded_file is not None:
             st.info("분석을 시작하려면 날짜 범위를 선택해주세요.")
 else:
     st.info("분석을 시작하려면 사이드바에서 엑셀 파일을 업로드하세요.")
+
 
