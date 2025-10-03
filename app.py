@@ -1,163 +1,144 @@
-import streamlit as st
 import pandas as pd
+import ipywidgets as iw
 import plotly.express as px
-from datetime import datetime
+from ipywidgets import interactive_output
+from IPython.display import display
 
-# --- Page Configuration ---
-# Set the layout and title for the Streamlit page.
-st.set_page_config(layout="wide", page_title="부동산 4분면 분석 앱")
+# --- 1. 파일 불러오기 및 데이터 전처리 ---
+# 파일 경로를 원래대로 직접 지정합니다.
+# 이 경로에 분석할 엑셀 파일이 있어야 합니다.
+file_path = "C:/Users/terra/OneDrive/바탕 화면/부동산4분면/20250818_주간시계열.xlsx"
 
-# --- Title ---
-st.title("📈 부동산 4분면 경로 분석")
-st.write("매매지수와 전세지수의 변화를 시각적으로 분석하여 시장 동향을 파악합니다.")
+try:
+    # 매매지수와 전세지수 데이터를 엑셀 파일에서 읽어옵니다.
+    sale = pd.read_excel(file_path, sheet_name="3.매매지수", skiprows=[0, 2, 3])
+    rent = pd.read_excel(file_path, sheet_name="4.전세지수", skiprows=[0, 2, 3])
 
-# --- Data Caching ---
-# Use st.cache_data to load and process data only once.
-# This improves performance by avoiding re-computation on every interaction.
-@st.cache_data
-def load_data(uploaded_file):
-    """
-    Loads and preprocesses the real estate data from an Excel file.
-    """
-    try:
-        # Read sales and rent index sheets from the uploaded Excel file.
-        sale = pd.read_excel(uploaded_file, sheet_name="3.매매지수", skiprows=[0, 2, 3])
-        rent = pd.read_excel(uploaded_file, sheet_name="4.전세지수", skiprows=[0, 2, 3])
+    # '구분' 열에 데이터가 없는 행을 제거합니다.
+    sale.dropna(subset=['구분'], inplace=True)
+    rent.dropna(subset=['구분'], inplace=True)
 
-        # --- Data Cleaning and Transformation ---
-        # Drop rows where '구분' (division) is null.
-        sale.dropna(subset=['구분'], inplace=True)
-        rent.dropna(subset=['구분'], inplace=True)
+    # 비어있는 값(NaN)을 0으로 채웁니다.
+    sale.fillna(0, inplace=True)
+    rent.fillna(0, inplace=True)
+    
+    # 경고 방지를 위해 데이터 타입을 추론하여 설정합니다.
+    sale = sale.infer_objects(copy=False)
+    rent = rent.infer_objects(copy=False)
 
-        # Fill any remaining NaN values with 0.
-        sale.fillna(0, inplace=True)
-        rent.fillna(0, inplace=True)
+    # '구분' 열의 이름을 '날짜'로 변경합니다.
+    sale.rename(columns={'구분': '날짜'}, inplace=True)
+    rent.rename(columns={'구분': '날짜'}, inplace=True)
+
+    # 데이터를 '긴' 형태로 변환합니다 (Melt).
+    sale_melt = sale.melt(id_vars=['날짜'], var_name='지역', value_name='매매지수')
+    rent_melt = rent.melt(id_vars=['날짜'], var_name='지역', value_name='전세지수')
+
+    # 매매와 전세 데이터를 '날짜'와 '지역'을 기준으로 합칩니다.
+    df = pd.merge(sale_melt, rent_melt, on=['날짜', '지역'])
+
+    # '날짜' 열을 날짜/시간 형식으로 변환합니다.
+    df['날짜'] = pd.to_datetime(df['날짜'])
+
+    # --- 2. 사용자 입력을 위한 위젯 생성 ---
+    startdate = iw.DatePicker(
+        description='시작날짜',
+        value=df['날짜'].min().date(), # 기본값으로 가장 빠른 날짜 설정
+        disabled=False
+    )
+
+    enddate = iw.DatePicker(
+        description='종료날짜',
+        value=df['날짜'].max().date(), # 기본값으로 가장 마지막 날짜 설정
+        disabled=False
+    )
+
+    region = iw.SelectMultiple(
+        options=sorted(df['지역'].unique()), # 지역 목록을 가나다순으로 정렬
+        value=sorted(df['지역'].unique())[:3], # 기본 선택값으로 처음 3개 지역 설정
+        description='지역 선택',
+        disabled=False,
+        rows=10 # 위젯의 높이를 10줄로 설정
+    )
+
+    # --- 3. 그래프를 그리는 함수 정의 ---
+    def plot_quadrant_chart(startdate, enddate, region):
+        if not startdate or not enddate or not region:
+            print("날짜와 지역을 선택하세요.")
+            return
+
+        # 위젯 값(datetime.date)을 pandas가 인식할 수 있는 datetime 형식으로 변환
+        start_dt = pd.to_datetime(startdate)
+        end_dt = pd.to_datetime(enddate)
         
-        # Infer object types to prevent warnings.
-        sale = sale.infer_objects(copy=False)
-        rent = rent.infer_objects(copy=False)
+        # 선택된 조건으로 데이터 필터링
+        mask = (df["날짜"] >= start_dt) & (df["날짜"] <= end_dt) & (df["지역"].isin(region))
+        df_sel = df[mask]
 
-        # Rename '구분' column to '날짜' (Date).
-        sale.rename(columns={'구분': '날짜'}, inplace=True)
-        rent.rename(columns={'구분': '날짜'}, inplace=True)
+        if df_sel.empty:
+            print("선택한 조건에 맞는 데이터가 없습니다.")
+            return
+            
+        # 날짜순으로 데이터 정렬
+        df_sel_sorted = df_sel.sort_values(by='날짜')
 
-        # Melt the dataframes from wide to long format.
-        sale_melt = sale.melt(id_vars=['날짜'], var_name='지역', value_name='매매지수')
-        rent_melt = rent.melt(id_vars=['날짜'], var_name='지역', value_name='전세지수')
-
-        # Merge the sales and rent dataframes on '날짜' and '지역'.
-        df_merged = pd.merge(sale_melt, rent_melt, on=['날짜', '지역'])
-
-        # Convert the '날짜' column to datetime objects.
-        df_merged['날짜'] = pd.to_datetime(df_merged['날짜'])
-        
-        return df_merged
-    except Exception as e:
-        st.error(f"파일을 처리하는 중 오류가 발생했습니다: {e}")
-        return None
-
-# --- Sidebar for User Inputs ---
-st.sidebar.header("⚙️ 분석 설정")
-uploaded_file = st.sidebar.file_uploader("📂 주간 시계열 엑셀 파일을 업로드하세요.", type=["xlsx"])
-# --- 파일 경로 및 로고 이미지 설정 ---
-# 🚨 app.py와 같은 폴더에 파일들이 있어야 합니다.
-excel_file_path = "20250922_주간시계열.xlsx"
-logo_image_path = "jak_logo.png" # 로고 파일 경로
-df = load_data(excel_file_path)
-
-# --- Main Application Logic ---
-if uploaded_file is not None:
-    df = load_data(excel_file_path)
-
-    if df is not None and not df.empty:
-        # Get unique regions and default selections.
-        all_regions = sorted(df['지역'].unique())
-        default_regions = all_regions[:3] if len(all_regions) >= 3 else all_regions
-
-        # --- Sidebar Widgets for Filtering ---
-        selected_regions = st.sidebar.multiselect(
-            "📍 지역 선택",
-            options=all_regions,
-            default=default_regions
+        # Plotly Express를 사용하여 경로 그래프 생성
+        fig = px.line(
+            df_sel_sorted,
+            x="매매지수",
+            y="전세지수",
+            color="지역",
+            markers=True,
+            hover_data={'날짜': '|%Y-%m-%d', '지역': True}
         )
 
-        min_date = df['날짜'].min().to_pydatetime()
-        max_date = df['날짜'].max().to_pydatetime()
-
-        selected_date_range = st.sidebar.date_input(
-            "📅 날짜 범위 선택",
-            value=(min_date, max_date),
-            min_value=min_date,
-            max_value=max_date,
-            format="YYYY.MM.DD"
-        )
-        
-        # Ensure two dates are selected for the range.
-        if len(selected_date_range) == 2:
-            start_date, end_date = selected_date_range
-            start_date = pd.to_datetime(start_date)
-            end_date = pd.to_datetime(end_date)
-
-            # --- Data Filtering based on User Input ---
-            mask = (
-                (df["날짜"] >= start_date) &
-                (df["날짜"] <= end_date) &
-                (df["지역"].isin(selected_regions))
+        # 각 지역의 마지막 지점을 찾아 주석(Annotation) 추가
+        last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
+        for _, row in last_points.iterrows():
+            fig.add_annotation(
+                x=row['매매지수'],
+                y=row['전세지수'],
+                text=f"<b>{row['지역']}</b>",
+                showarrow=False,
+                yshift=10,
+                font=dict(family="sans-serif", size=12, color="black"),
+                bgcolor="rgba(255, 255, 255, 0.6)"
             )
-            df_sel = df[mask]
 
-            # --- Chart Generation ---
-            if not df_sel.empty:
-                df_sel_sorted = df_sel.sort_values(by='날짜')
+        # 그래프 레이아웃 업데이트
+        date_format = "%Y년 %m월 %d일"
+        fig.update_layout(
+            title=f"<b>부동산 4분면 경로 ({start_dt.strftime(date_format)} ~ {end_dt.strftime(date_format)})</b>",
+            xaxis_title="매매지수",
+            yaxis_title="전세지수",
+            height=700,
+            legend_title_text='지역',
+            xaxis=dict(gridcolor='lightgrey'),
+            yaxis=dict(gridcolor='lightgrey'),
+            plot_bgcolor='white'
+        )
 
-                # Create a line chart with markers to show the path of change.
-                fig = px.line(
-                    df_sel_sorted,
-                    x="매매지수",
-                    y="전세지수",
-                    color="지역",
-                    markers=True,
-                    hover_data=['날짜', '지역']
-                )
+        # 0을 기준으로 수평/수직선 추가
+        fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="black")
+        fig.add_vline(x=0, line_width=1, line_dash="dash", line_color="black")
+        
+        fig.show()
 
-                # Find the last data point for each region to add annotations.
-                last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
+    # --- 4. 위젯과 함수 연결 및 표시 ---
+    # 위젯 UI 구성
+    ui = iw.HBox([iw.VBox([startdate, enddate]), region])
+    
+    # 위젯의 값 변경에 따라 함수가 실행되도록 연결
+    out = interactive_output(plot_quadrant_chart, {
+        "startdate": startdate,
+        "enddate": enddate,
+        "region": region
+    })
 
-                # Add region name annotations at the end of each line.
-                for _, row in last_points.iterrows():
-                    fig.add_annotation(
-                        x=row['매매지수'],
-                        y=row['전세지수'],
-                        text=f"<b>{row['지역']}</b>",
-                        showarrow=False,
-                        yshift=10,
-                        font=dict(family="sans-serif", size=12, color="black"),
-                        bgcolor="rgba(255, 255, 255, 0.6)"
-                    )
+    # UI와 결과 출력
+    display(ui, out)
 
-                # --- Chart Layout and Display ---
-                date_format = "%Y년 %m월 %d일"
-                fig.update_layout(
-                    title=f"<b>부동산 4분면 경로 ({start_date.strftime(date_format)} ~ {end_date.strftime(date_format)})</b>",
-                    xaxis_title="매매지수",
-                    yaxis_title="전세지수",
-                    height=700,
-                    legend_title_text='지역',
-                    xaxis=dict(gridcolor='lightgrey'),
-                    yaxis=dict(gridcolor='lightgrey'),
-                    plot_bgcolor='white'
-                )
-                
-                # Add horizontal and vertical lines at zero.
-                fig.add_hline(y=0, line_width=1, line_dash="dash", line_color="black")
-                fig.add_vline(x=0, line_width=1, line_dash="dash", line_color="black")
-
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.warning("선택하신 조건에 해당하는 데이터가 없습니다. 지역이나 날짜 범위를 다시 설정해주세요.")
-        else:
-            st.info("분석을 시작하려면 날짜 범위를 선택해주세요.")
-else:
-    st.info("분석을 시작하려면 사이드바에서 엑셀 파일을 업로드하세요.")
-
-
+except FileNotFoundError:
+    print(f"오류: '{file_path}' 경로에서 파일을 찾을 수 없습니다. 파일 경로를 확인해주세요.")
+except Exception as e:
+    print(f"데이터를 처리하는 중 오류가 발생했습니다: {e}")
