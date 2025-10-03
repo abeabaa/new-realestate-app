@@ -15,7 +15,7 @@ def load_data(file_path):
     """엑셀 파일을 로드하고 데이터를 전처리하는 함수"""
     try:
         sale = pd.read_excel(file_path, sheet_name="3.매매지수", skiprows=[0, 2, 3])
-        rent = pd.read_excel(file_path, sheet_name="4.전세지수수", skiprows=[0, 2, 3])
+        rent = pd.read_excel(file_path, sheet_name="4.전세지수", skiprows=[0, 2, 3])
     except FileNotFoundError:
         st.error(f"'{file_path}' 파일을 찾을 수 없습니다. app.py와 같은 폴더에 엑셀 파일을 넣어주세요.")
         st.stop()
@@ -129,6 +129,7 @@ else:
         legend_title="지역"
     )
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
