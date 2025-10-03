@@ -69,6 +69,16 @@ selected_regions = st.sidebar.multiselect(
     default=all_regions[:5] # 기본값: 처음 5개 지역 선택
 )
 
+# --- 🎨 사용자 색상 선택 기능 ---
+st.sidebar.header("🎨 색상을 지정하세요")
+color_map = {}
+# 사용자가 선택한 각 지역에 대해 색상 선택 위젯을 동적으로 생성합니다.
+for region in selected_regions:
+    # st.color_picker는 사용자가 색상을 고를 수 있는 위젯입니다.
+    default_color = '#000000' # 기본값은 검은색으로 설정
+    selected_color = st.sidebar.color_picker(f"'{region}' 색상", default_color)
+    color_map[region] = selected_color # 딕셔너리에 '지역:선택된 색상'을 저장합니다.
+
 
 # --- 메인 화면 ---
 col1_main, col2_main = st.columns([1, 10])
@@ -130,6 +140,7 @@ else:
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
