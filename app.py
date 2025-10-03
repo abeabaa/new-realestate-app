@@ -61,11 +61,11 @@ if len(selected_dates) != 2:
 start_date, end_date = selected_dates
 
 # 2. 지역 선택 위젯
-all_regions = sorted(df["지역"].unique())
+all_regions = df["지역"].unique()
 selected_regions = st.sidebar.multiselect(
     "지역 선택",
     options=all_regions,
-    default=all_regions[:3]
+    default=all_regions[:5] # 기본값: 처음 5개 지역 선택
 )
 
 # --- 🎨 사용자 색상 선택 기능 ---
@@ -131,4 +131,5 @@ else:
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
+
 
