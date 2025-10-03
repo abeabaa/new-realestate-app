@@ -42,6 +42,7 @@ def load_data(file_path):
 # --- ⚙️ 중요: 파일 경로를 상대 경로로 변경 ---
 # 로컬 컴퓨터 경로 대신 파일 이름만 사용합니다.
 file_path = "20250922_주간시계열.xlsx"
+logo_image_path = "jak_logo.png" # 로고 파일 경로
 df = load_data(file_path)
 
 # --- 사이드바 (사용자 입력 UI) ---
@@ -69,7 +70,15 @@ selected_regions = st.sidebar.multiselect(
 )
 
 # --- 메인 화면 ---
-st.title("✒️ 부동산 매매/전세 지수 경로 분석")
+col1_main, col2_main = st.columns([1, 10])
+with col1_main:
+    try:
+        st.image(logo_image_path, width=700) # 로고 이미지 표시
+    except Exception as e:
+        st.error(f"로고 파일을 불러올 수 없습니다: {e}")
+        st.info(f"`{logo_image_path}` 파일이 현재 폴더에 있는지 확인해주세요.")
+with col2_main:
+    st.title("부동산 매매/전세 가격 경로 분석")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
@@ -120,4 +129,5 @@ else:
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
+
 
