@@ -41,8 +41,7 @@ def load_data(file_path):
 
 # --- ⚙️ 중요: 파일 경로를 상대 경로로 변경 ---
 # 로컬 컴퓨터 경로 대신 파일 이름만 사용합니다.
-file_path = "20250922_주간시계열.xlsx"
-logo_image_path = "jak_logo.png" # 로고 파일 경로
+file_path = "20250818_주간시계열.xlsx"
 df = load_data(file_path)
 
 # --- 사이드바 (사용자 입력 UI) ---
@@ -62,11 +61,11 @@ if len(selected_dates) != 2:
 start_date, end_date = selected_dates
 
 # 2. 지역 선택 위젯
-all_regions = df["지역"].unique()
+all_regions = sorted(df["지역"].unique())
 selected_regions = st.sidebar.multiselect(
     "지역 선택",
     options=all_regions,
-    default=all_regions[:5] # 기본값: 처음 5개 지역 선택
+    default=all_regions[:3]
 )
 
 # --- 🎨 사용자 색상 선택 기능 ---
@@ -79,17 +78,8 @@ for region in selected_regions:
     selected_color = st.sidebar.color_picker(f"'{region}' 색상", default_color)
     color_map[region] = selected_color # 딕셔너리에 '지역:선택된 색상'을 저장합니다.
 
-
 # --- 메인 화면 ---
-col1_main, col2_main = st.columns([1, 10])
-with col1_main:
-    try:
-        st.image(logo_image_path, width=700) # 로고 이미지 표시
-    except Exception as e:
-        st.error(f"로고 파일을 불러올 수 없습니다: {e}")
-        st.info(f"`{logo_image_path}` 파일이 현재 폴더에 있는지 확인해주세요.")
-with col2_main:
-    st.title("부동산 매매/전세 가격 경로 분석")
+st.title("✒️ 부동산 매매/전세 지수 경로 분석")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
@@ -111,7 +101,8 @@ else:
         y="전세지수",
         color="지역",
         markers=True,
-        hover_data=['날짜', '지역']
+        hover_data=['날짜', '지역'],
+        color_discrete_map=color_map # 사용자가 선택한 색상 맵 적용
     )
 
     # 경로 마지막에 지역명 표시
@@ -135,12 +126,8 @@ else:
         yaxis_title="전세지수",
         height=700,
         legend_title="지역",
-        showlegend=False # 주석으로 지역을 표시하므로 범례는 숨깁니다.
+        showlegend=True # 색상을 직접 지정하므로 범례를 다시 표시합니다.
     )
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
-
-
-
-
