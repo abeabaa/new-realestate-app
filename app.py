@@ -140,8 +140,3 @@ else:
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
-
-
-
-
-
