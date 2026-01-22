@@ -134,5 +134,24 @@ else:
         yaxis_title="전세지수",
         height=None,  # 고정 높이 해제
         legend_title="지역",
-        showlegend=
+        showlegend=True
+    )
 
+    # 2. CSS 주입: 그래프 컨테이너의 가로세로 비율을 고정
+    # aspect-ratio: 16 / 9 (와이드) 또는 1 / 1 (정사각형) 중 선택하세요.
+    st.markdown(
+        """
+        <style>
+        /* Plotly 차트가 담기는 iframe 컨테이너의 비율 설정 */
+        iframe[title="plotly.graph_objs._figure.Figure"] {
+            aspect-ratio: 16 / 9 !important; 
+            width: 100% !important;
+            height: auto !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 3. Streamlit에 그래프 표시
+    st.plotly_chart(fig, use_container_width=True)
