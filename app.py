@@ -101,7 +101,7 @@ if df_sel.empty:
     st.warning("선택한 조건에 맞는 데이터가 없습니다. 다른 필터를 선택해주세요.")
 else:
     # 경로 플롯을 그리기 위해 날짜순으로 정렬
-    df_sel_sorted = df_sel.sort_values(by=['지역', '날짜'])
+    df_sel_sorted = df_sel.sort_values(by='날짜')
 
     # px.line으로 경로 그래프 그리기
     fig = px.line(
@@ -111,48 +111,35 @@ else:
         color="지역",
         markers=True,
         hover_data=['날짜', '지역'],
-        color_discrete_map=color_map
+        color_discrete_map=color_map # 사용자가 선택한 색상 맵 적용
     )
 
-    # (이전 답변에서 드린 화살표/텍스트 추가 로직이 있다면 여기에 위치합니다)
+    # 경로 마지막에 지역명 표시
     last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
+    
     for index, row in last_points.iterrows():
         fig.add_annotation(
-            x=row['매매지수'], y=row['전세지수'],
+            x=row['매매지수'],
+            y=row['전세지수'],
             text=f"<b>{row['지역']}</b>",
-            showarrow=False, yshift=12,
+            showarrow=False,
+            yshift=12,
             font=dict(size=12, color="black"),
             bgcolor="rgba(255, 255, 255, 0.7)"
         )
 
-    # --- 비율 고정을 위한 CSS 및 레이아웃 설정 ---
-    
-    # 1. Plotly 자체의 height 설정을 제거 (CSS가 제어하도록 함)
+    # 그래프 레이아웃 설정
     fig.update_layout(
-        title=f"부동산 4분면 지수 경로 ({start_date} ~ {end_date})",
+        title=f"부동산 4분면 지수 경로 ({start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')})",
         xaxis_title="매매지수",
         yaxis_title="전세지수",
-        height=None,  # 고정 높이 해제
+        #height=700,
         legend_title="지역",
-        showlegend=True
+        showlegend=True # 색상을 직접 지정하므로 범례를 다시 표시합니다.
+        autosize=True,
+        xaxis=dict(scaleanchor="y", scaleratio=1), # X축과 Y축의 비율을 1:1로 고정
+        yaxis=dict(constrain='domain'),
     )
 
-    # 2. CSS 주입: 그래프 컨테이너의 가로세로 비율을 고정
-    # aspect-ratio: 16 / 9 (와이드) 또는 1 / 1 (정사각형) 중 선택하세요.
-    st.markdown(
-        """
-        <style>
-        /* Plotly 차트가 담기는 iframe 컨테이너의 비율 설정 */
-        iframe[title="plotly.graph_objs._figure.Figure"] {
-            aspect-ratio: 16 / 9 !important; 
-            width: 100% !important;
-            height: auto !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # 3. Streamlit에 그래프 표시
+    # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
-
