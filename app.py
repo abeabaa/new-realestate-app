@@ -107,7 +107,7 @@ else:
             xref="x", yref="y",
             axref="x", ayref="y",
             showarrow=True,
-            arrowhead=5, # 화살표 머리 모양 (1~8)
+            arrowhead=2, # 화살표 머리 모양 (1~8)
             arrowsize=3,
             arrowwidth=5,
             arrowcolor=color_map.get(region, "black")
@@ -133,4 +133,5 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
