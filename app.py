@@ -75,55 +75,75 @@ df_sel = df[mask]
 
 # --- 그래프 시각화 ---
 if df_sel.empty:
-    st.warning("데이터가 없습니다.")
+    st.warning("선택한 조건에 맞는 데이터가 없습니다. 다른 필터를 선택해주세요.")
 else:
+    # 1. 지역과 날짜순으로 데이터 정렬
     df_sel_sorted = df_sel.sort_values(by=['지역', '날짜'])
 
+    # 2. 기본 라인 그래프 생성 (선은 지우고 포인트만 남기거나, 얇은 선으로 배경 처리 가능)
     fig = px.line(
         df_sel_sorted,
         x="매매지수",
         y="전세지수",
         color="지역",
-        markers=True,
+        markers=False, # 화살표가 점 역할을 하므로 점은 숨깁니다
         hover_data=['날짜', '지역'],
-        color_discrete_map=color_map
+        color_discrete_map=color_map 
     )
 
-  # --- 화살표 및 지역명 표시 로직 ---
+    # 3. 모든 구간에 화살표 추가
     for region in selected_regions:
-        region_df = df_sel_sorted[df_sel_sorted['지역'] == region]
-        if len(region_df) < 2: continue 
+        reg_data = df_sel_sorted[df_sel_sorted['지역'] == region]
+        reg_color = color_map.get(region, "#000000")
+        
+        # 데이터가 2개 이상이어야 화살표(선) 형성 가능
+        for i in range(len(reg_data) - 1):
+            curr_pt = reg_data.iloc[i]
+            next_pt = reg_data.iloc[i+1]
+            
+            # 이전 점에서 다음 점으로 향하는 화살표 추가
+            fig.add_annotation(
+                x=next_pt['매매지수'],    # 화살촉이 도착하는 곳
+                y=next_pt['전세지수'],
+                ax=curr_pt['매매지수'],   # 화살표가 시작되는 곳
+                ay=curr_pt['전세지수'],
+                xref="x", yref="y",
+                axref="x", ayref="y",
+                text="", 
+                showarrow=True,
+                arrowhead=2,           # 화살표 머리 스타일
+                arrowsize=1.2,         # 화살표 머리 크기
+                arrowwidth=1.5,        # 선 굵기
+                arrowcolor=reg_color,  # 지역별 지정 색상
+                opacity=0.8            # 너무 진하면 겹칠 때 복잡하므로 약간 투명하게
+            )
+        
+        # 4. 마지막 지점에 지역명 표시 (가독성)
+        if not reg_data.empty:
+            last_pt = reg_data.iloc[-1]
+            fig.add_annotation(
+                x=last_pt['매매지수'],
+                y=last_pt['전세지수'],
+                text=f"<b>{region}</b>",
+                showarrow=False,
+                yshift=15,
+                font=dict(size=12, color=reg_color),
+                bgcolor="rgba(255, 255, 255, 0.7)"
+            )
 
-        last_row = region_df.iloc[-1]
-        prev_row = region_df.iloc[-2]
-
-        # 화살표 추가 (axref="x"를 사용하여 데이터 포인트에 고정)
-        fig.add_annotation(
-            x=last_row['매매지수'],  # 화살표 머리 (현재 지점)
-            y=last_row['전세지수'],
-            ax=prev_row['매매지수'], # 화살표 꼬리 (이전 지점)
-            ay=prev_row['전세지수'],
-            xref="x", yref="y",
-            axref="x", ayref="y",
-            showarrow=True,
-            arrowhead=2,           # 화살표 머리 모양
-            arrowsize=1.2,         # 머리 크기 (이 값은 줌을 해도 일정함)
-            arrowwidth=2,          # 선 굵기
-            arrowcolor=color_map.get(region, "black"),
-            standoff=0,            # 머리가 포인트에 닿는 정도
-            startstandoff=0        # 꼬리가 포인트에 닿는 정도
-        )
-
-        # 지역 이름 텍스트 추가
-        fig.add_annotation(
-            x=last_row['매매지수'],
-            y=last_row['전세지수'],
-            text=f"<b>{region}</b>",
-            showarrow=False,
-            yshift=15,
-            font=dict(size=12, color=color_map.get(region, "black")),
-            bgcolor="rgba(255, 255, 255, 0.8)"
-        )
+    # 그래프 레이아웃 설정
+    fig.update_layout(
+        title=f"부동산 4분면 지수 경로 (화살표 방향 분석)",
+        xaxis_title="매매지수",
+        yaxis_title="전세지수",
+        height=800,
+        showlegend=True,
+        plot_bgcolor='white' # 배경을 깨끗하게 설정
+    )
+    
+    # 격자선 추가 (4분면 분석을 용이하게 함)
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='LightGrey')
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='LightGrey')
 
     st.plotly_chart(fig, use_container_width=True)
 
