@@ -118,7 +118,7 @@ else:
     last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
     for index, row in last_points.iterrows():
         fig.add_annotation(
-            x=row['매매os'], y=row['전세지수'],
+            x=row['매매지수'], y=row['전세지수'],
             text=f"<b>{row['지역']}</b>",
             showarrow=False, yshift=12,
             font=dict(size=12, color="black"),
@@ -155,3 +155,4 @@ else:
 
     # 3. Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
+
