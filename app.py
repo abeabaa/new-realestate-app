@@ -89,15 +89,7 @@ else:
         color_discrete_map=color_map
     )
 
-   # --- 화살표 및 지역명 표시 로직 ---
-    import math
-
-    # 시각적인 방향 계산을 위한 전체 데이터 범위 (기울기 보정용)
-    x_range = df_sel['매매지수'].max() - df_sel['매매지수'].min()
-    y_range = df_sel['전세지수'].max() - df_sel['전세지수'].min()
-    x_range = x_range if x_range != 0 else 1
-    y_range = y_range if y_range != 0 else 1
-
+  # --- 화살표 및 지역명 표시 로직 ---
     for region in selected_regions:
         region_df = df_sel_sorted[df_sel_sorted['지역'] == region]
         if len(region_df) < 2: continue 
@@ -105,35 +97,21 @@ else:
         last_row = region_df.iloc[-1]
         prev_row = region_df.iloc[-2]
 
-        # 1. 데이터 상의 변화량 계산
-        dx = (last_row['매매지수'] - prev_row['매매지수']) / x_range
-        dy = (last_row['전세지수'] - prev_row['전세지수']) / y_range
-        
-        # 2. 각도 계산 (atan2)
-        angle = math.atan2(dy, dx)
-
-        # 3. 화살표의 길이를 픽셀 단위로 고정 (예: 30픽셀)
-        arrow_length = 30 
-        
-        # 4. 픽셀 오프셋 계산 
-        # ax, ay는 머리(x,y)로부터 꼬리가 떨어진 거리입니다.
-        # 방향을 맞추기 위해 dx가 양수(오른쪽 이동)면 꼬리는 왼쪽(-값)에 있어야 함
-        ax_pix = -arrow_length * math.cos(angle)
-        ay_pix = arrow_length * math.sin(angle) # Plotly에서 ay는 위가 -, 아래가 +
-
-        # 화살표 추가
+        # 화살표 추가 (axref="x"를 사용하여 데이터 포인트에 고정)
         fig.add_annotation(
-            x=last_row['매매지수'],  
+            x=last_row['매매지수'],  # 화살표 머리 (현재 지점)
             y=last_row['전세지수'],
-            ax=ax_pix,             # 픽셀 단위 오프셋
-            ay=ay_pix,             # 픽셀 단위 오프셋
+            ax=prev_row['매매지수'], # 화살표 꼬리 (이전 지점)
+            ay=prev_row['전세지수'],
             xref="x", yref="y",
-            # axref, ayref를 설정하지 않으면 기본 'pixel' 단위가 됩니다.
+            axref="x", ayref="y",
             showarrow=True,
-            arrowhead=2,
-            arrowsize=1.2,
-            arrowwidth=2,
-            arrowcolor=color_map.get(region, "black")
+            arrowhead=2,           # 화살표 머리 모양
+            arrowsize=1.2,         # 머리 크기 (이 값은 줌을 해도 일정함)
+            arrowwidth=2,          # 선 굵기
+            arrowcolor=color_map.get(region, "black"),
+            standoff=0,            # 머리가 포인트에 닿는 정도
+            startstandoff=0        # 꼬리가 포인트에 닿는 정도
         )
 
         # 지역 이름 텍스트 추가
@@ -148,4 +126,5 @@ else:
         )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
