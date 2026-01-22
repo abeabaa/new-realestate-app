@@ -73,4 +73,47 @@ df_sel_sorted = df_filtered.groupby('지역', group_keys=False).apply(lambda x: 
 if df_sel_sorted.empty:
     st.warning("선택한 조건에 맞는 데이터가 없습니다.")
 else:
-    # 기본 라
+    # 기본 라인 생성 (선은 얇게 보조적으로 사용)
+    fig = px.line(
+        df_sel_sorted, x="매매지수", y="전세지수", color="지역",
+        hover_data=['날짜', '지역'],
+        color_discrete_map=color_map,
+        render_mode="svg" # 고품질 렌더링
+    )
+
+    annotations = []
+    for region in selected_regions:
+        reg_data = df_sel_sorted[df_sel_sorted['지역'] == region]
+        reg_color = color_map.get(region, "#000000")
+        
+        # 모든 구간에 화살표 추가
+        for i in range(len(reg_data) - 1):
+            curr = reg_data.iloc[i]
+            nxt = reg_data.iloc[i+1]
+            
+            annotations.append(dict(
+                x=nxt['매매지수'], y=nxt['전세지수'],
+                ax=curr['매매지수'], ay=curr['전세지수'],
+                xref="x", yref="y", axref="x", ayref="y",
+                showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=1.5,
+                arrowcolor=reg_color, opacity=0.7
+            ))
+            
+        # 마지막 포인트 지역명 표시
+        if not reg_data.empty:
+            last = reg_data.iloc[-1]
+            annotations.append(dict(
+                x=last['매매지수'], y=last['전세지수'],
+                text=f"<b>{region}</b>", showarrow=False,
+                yshift=15, font=dict(size=12, color=reg_color),
+                bgcolor="rgba(255, 255, 255, 0.8)"
+            ))
+
+    fig.update_layout(
+        annotations=annotations,
+        title=f"부동산 4분면 경로 (4주 단위 샘플링)",
+        xaxis_title="매매지수", yaxis_title="전세지수",
+        height=750, template="plotly_white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
