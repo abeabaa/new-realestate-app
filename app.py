@@ -10,10 +10,12 @@ st.set_page_config(
 )
 
 # --- 데이터 로딩 및 전처리 ---
+# @st.cache_data: 데이터 로딩을 캐싱하여 앱 속도를 향상시킵니다.
 @st.cache_data
 def load_data(file_path):
     """엑셀 파일을 로드하고 데이터를 전처리하는 함수"""
     try:
+        # '3.매매지수', '4.전세지수' 시트를 읽습니다.
         sale = pd.read_excel(file_path, sheet_name="3.매매지수", skiprows=[0, 2, 3])
         rent = pd.read_excel(file_path, sheet_name="4.전세지수", skiprows=[0, 2, 3])
     except FileNotFoundError:
@@ -37,8 +39,10 @@ def load_data(file_path):
     df['날짜'] = pd.to_datetime(df['날짜'])
     return df
 
-file_path = "20251103_주간시계열.xlsx"
-logo_image_path = "" # 로고 파일 경로
+# --- ⚙️ 중요: 파일 경로를 상대 경로로 변경 ---
+# 로컬 컴퓨터 경로 대신 파일 이름만 사용합니다.
+file_path = "주간시계열.xlsx"
+logo_image_path = "jak_logo.png" # 로고 파일 경로
 df = load_data(file_path)
 
 # --- 사이드바 (사용자 입력 UI) ---
@@ -65,12 +69,15 @@ selected_regions = st.sidebar.multiselect(
     default=all_regions[:5] # 기본값: 처음 5개 지역 선택
 )
 
+# --- 🎨 사용자 색상 선택 기능 ---
 st.sidebar.header("🎨 색상을 지정하세요")
 color_map = {}
+# 사용자가 선택한 각 지역에 대해 색상 선택 위젯을 동적으로 생성합니다.
 for region in selected_regions:
+    # st.color_picker는 사용자가 색상을 고를 수 있는 위젯입니다.
     default_color = '#000000' # 기본값은 검은색으로 설정
     selected_color = st.sidebar.color_picker(f"'{region}' 색상", default_color)
-    color_map[region] = selected_color
+    color_map[region] = selected_color # 딕셔너리에 '지역:선택된 색상'을 저장합니다.
 
 # --- 메인 화면 ---
 col1_main, col2_main = st.columns([1, 10])
@@ -93,9 +100,10 @@ df_sel = df[mask]
 if df_sel.empty:
     st.warning("선택한 조건에 맞는 데이터가 없습니다. 다른 필터를 선택해주세요.")
 else:
-    
+    # 경로 플롯을 그리기 위해 날짜순으로 정렬
     df_sel_sorted = df_sel.sort_values(by='날짜')
 
+    # px.line으로 경로 그래프 그리기
     fig = px.line(
         df_sel_sorted,
         x="매매지수",
@@ -103,7 +111,7 @@ else:
         color="지역",
         markers=True,
         hover_data=['날짜', '지역'],
-        color_discrete_map=color_map 
+        color_discrete_map=color_map # 사용자가 선택한 색상 맵 적용
     )
 
     # 경로 마지막에 지역명 표시
@@ -127,15 +135,11 @@ else:
         yaxis_title="전세지수",
         height=700,
         legend_title="지역",
-        showlegend=True 
+        showlegend=True # 색상을 직접 지정하므로 범례를 다시 표시합니다.
     )
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
-
-
-
-
 
 
 
