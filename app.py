@@ -135,7 +135,7 @@ else:
         yaxis_title="전세지수",
         #height=700,
         legend_title="지역",
-        showlegend=True # 색상을 직접 지정하므로 범례를 다시 표시합니다.
+        showlegend=True, # 색상을 직접 지정하므로 범례를 다시 표시합니다.
         autosize=True,
         xaxis=dict(scaleanchor="y", scaleratio=1), # X축과 Y축의 비율을 1:1로 고정
         yaxis=dict(constrain='domain'),
@@ -143,3 +143,4 @@ else:
 
     # Streamlit에 그래프 표시
     st.plotly_chart(fig, use_container_width=True)
+
