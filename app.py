@@ -122,7 +122,7 @@ else:
             x=[first['매매지수']], y=[first['전세지수']],
             mode='markers+text',
             text=["START"], textposition="bottom center",
-            marker=dict(color="grey", size=8, symbol="star"),
+            marker=dict(color="grey", size=8, symbol="circle"),
             showlegend=False
         ))
 
@@ -136,3 +136,4 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
