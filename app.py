@@ -132,15 +132,16 @@ else:
             bgcolor=reg_color, borderpad=4, opacity=1
         )
 
-        # 4. 시작 지점 표시
-        first = rdf.iloc[0]
-        fig.add_trace(go.Scatter(
-            x=[first['매매지수']], y=[first['전세지수']],
-            mode='markers+text',
-            text=["START"], textposition="bottom center",
-            marker=dict(color="grey", size=8, symbol="circle"),
-            showlegend=False
-        ))
+        # 5. 종료 지점(가장 최근 날짜) 표시
+    last = rdf.iloc[-1]
+    fig.add_trace(go.Scatter(
+        x=[last['매매지수']], y=[last['전세지수']],
+        mode='markers+text',
+        text=["recent"], # 또는 "현재"
+        textposition="top center", # 시작점(bottom)과 겹치지 않게 위쪽으로 설정
+        marker=dict(color=reg_color, size=10, symbol="circle"), # 지역 색상을 그대로 사용
+        showlegend=False
+    ))
 
     # 레이아웃 설정
     fig.update_layout(
@@ -152,6 +153,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
