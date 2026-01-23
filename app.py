@@ -117,8 +117,8 @@ else:
                 axref="pixel", ayref="pixel", # 픽셀 기준으로 고정
                 showarrow=True, 
                 arrowhead=2, 
-                arrowsize=10, 
-                arrowwidth=0.1,
+                arrowsize=100, 
+                arrowwidth=0.01,
                 arrowcolor=reg_color
             )
         
@@ -152,6 +152,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
