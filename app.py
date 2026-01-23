@@ -118,7 +118,7 @@ else:
                 showarrow=True, 
                 arrowhead=2, 
                 arrowsize=1.5, 
-                arrowwidth=0,
+                arrowwidth=0.1,
                 arrowcolor=reg_color
             )
         
@@ -152,6 +152,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
