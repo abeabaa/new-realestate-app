@@ -92,35 +92,35 @@ else:
         ))
 
         # 2. 유동적 진행 화살표 추가 (중간중간 흐름 표시)
-        if len(rdf) > 1:
-            last_point = rdf.iloc[-1]
-            prev_point = rdf.iloc[-2]
-            
-            # 실제 데이터의 방향(기울기) 계산
-            dx = last_point['매매지수'] - prev_point['매매지수']
-            dy = last_point['전세지수'] - prev_point['전세지수']
-            
-            # 화살표가 너무 작아 보이지 않도록 방향 벡터 정규화 (길이 고정)
-            import numpy as np
-            mag = np.sqrt(dx**2 + dy**2)
-            if mag != 0:
-                # 픽셀 단위로 화살표 길이를 약 30~40 정도로 고정
-                ax_val = -(dx / mag) * 40 
-                ay_val = (dy / mag) * 40  # Plotly의 ay는 위쪽이 마이너스이므로 방향 반전
-            else:
-                ax_val, ay_val = 0, 0
+        #if len(rdf) > 1:
+        #    last_point = rdf.iloc[-1]
+        #    prev_point = rdf.iloc[-2]
+        #    
+        #    # 실제 데이터의 방향(기울기) 계산
+        #    dx = last_point['매매지수'] - prev_point['매매지수']
+        #    dy = last_point['전세지수'] - prev_point['전세지수']
+        #    
+        #    # 화살표가 너무 작아 보이지 않도록 방향 벡터 정규화 (길이 고정)
+        #    import numpy as np
+        #    mag = np.sqrt(dx**2 + dy**2)
+        #    if mag != 0:
+        #        # 픽셀 단위로 화살표 길이를 약 30~40 정도로 고정
+        #        ax_val = -(dx / mag) * 40 
+        #        ay_val = (dy / mag) * 40  # Plotly의 ay는 위쪽이 마이너스이므로 방향 반전
+        #    else:
+        #        ax_val, ay_val = 0, 0
 
-            fig.add_annotation(
-                x=last_point['매매지수'], y=last_point['전세지수'],
-                ax=ax_val, ay=ay_val,  # 이제 ax, ay는 좌표가 아니라 픽셀 거리입니다.
-                xref="x", yref="y",
-                axref="pixel", ayref="pixel", # 픽셀 기준으로 고정
-                showarrow=True, 
-                arrowhead=3, 
-                arrowsize=20, 
-                arrowwidth=0.1,
-                arrowcolor=reg_color
-            )
+        #    fig.add_annotation(
+        #        x=last_point['매매지수'], y=last_point['전세지수'],
+        #        ax=ax_val, ay=ay_val,  # 이제 ax, ay는 좌표가 아니라 픽셀 거리입니다.
+        #        xref="x", yref="y",
+        #        axref="pixel", ayref="pixel", # 픽셀 기준으로 고정
+        #        showarrow=True, 
+        #        arrowhead=3, 
+        #        arrowsize=20, 
+        #        arrowwidth=0.1,
+        #        arrowcolor=reg_color
+        #    )
         
         # 3. 최신 지점(현재) 강조 레이블
         last = rdf.iloc[-1]
@@ -133,15 +133,15 @@ else:
         )
 
         # 5. 종료 지점(가장 최근 날짜) 표시
-    last = rdf.iloc[-1]
-    fig.add_trace(go.Scatter(
-        x=[last['매매지수']], y=[last['전세지수']],
-        mode='markers+text',
-        text=["recent"], # 또는 "현재"
-        textposition="top center", # 시작점(bottom)과 겹치지 않게 위쪽으로 설정
-        marker=dict(color=reg_color, size=10, symbol="circle"), # 지역 색상을 그대로 사용
-        showlegend=False
-    ))
+        last = rdf.iloc[-1]
+        fig.add_trace(go.Scatter(
+            x=[last['매매지수']], y=[last['전세지수']],
+            mode='markers+text',
+            text=["recent"], # 또는 "현재"
+            textposition="top center", # 시작점(bottom)과 겹치지 않게 위쪽으로 설정
+            marker=dict(color=reg_color, size=10, symbol="circle"), # 지역 색상을 그대로 사용
+            showlegend=False
+        ))
 
     # 레이아웃 설정
     fig.update_layout(
@@ -153,6 +153,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
