@@ -143,6 +143,15 @@ else:
             showlegend=False
         ))
 
+        first = rdf.iloc[0]
+        fig.add_trace(go.Scatter(
+            x=[first['매매지수']], y=[first['전세지수']],
+            mode='markers+text',
+            text=["START"], textposition="bottom center",
+            marker=dict(color="grey", size=8, symbol="circle"),
+            showlegend=False
+        ))
+
     # 레이아웃 설정
     fig.update_layout(
         title=f"부동산 지수 경로 분석 ({start_date} ~ {end_date})",
@@ -153,6 +162,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
