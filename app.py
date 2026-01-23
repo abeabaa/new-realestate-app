@@ -92,21 +92,34 @@ else:
         ))
 
         # 2. 유동적 진행 화살표 추가 (중간중간 흐름 표시)
-        # 데이터가 너무 많으면 지저분하므로 4개 포인트마다 화살표 생성
         if len(rdf) > 1:
             last_point = rdf.iloc[-1]
             prev_point = rdf.iloc[-2]
             
+            # 실제 데이터의 방향(기울기) 계산
+            dx = last_point['매매지수'] - prev_point['매매지수']
+            dy = last_point['전세지수'] - prev_point['전세지수']
+            
+            # 화살표가 너무 작아 보이지 않도록 방향 벡터 정규화 (길이 고정)
+            import numpy as np
+            mag = np.sqrt(dx**2 + dy**2)
+            if mag != 0:
+                # 픽셀 단위로 화살표 길이를 약 30~40 정도로 고정
+                ax_val = -(dx / mag) * 40 
+                ay_val = (dy / mag) * 40  # Plotly의 ay는 위쪽이 마이너스이므로 방향 반전
+            else:
+                ax_val, ay_val = 0, 0
+
             fig.add_annotation(
-                x=last_point['매매지수'], y=last_point['전세지수'], # 화살표 머리 (현재)
-                ax=prev_point['매매지수'], ay=prev_point['전세지수'], # 화살표 꼬리 (직전)
-                xref="x", yref="y", axref="x", ayref="y",
+                x=last_point['매매지수'], y=last_point['전세지수'],
+                ax=ax_val, ay=ay_val,  # 이제 ax, ay는 좌표가 아니라 픽셀 거리입니다.
+                xref="x", yref="y",
+                axref="pixel", ayref="pixel", # 픽셀 기준으로 고정
                 showarrow=True, 
-                arrowhead=3,      # 화살표 머리 모양 (1~8)
-                arrowsize=1.5,    # 화살표 크기
-                arrowwidth=3,     # 화살표 두께 (강조를 위해 조금 두껍게 설정)
-                arrowcolor=reg_color, 
-                opacity=1.0       # 선명하게 표시
+                arrowhead=3, 
+                arrowsize=1.5, 
+                arrowwidth=2.5,
+                arrowcolor=reg_color
             )
         
         # 3. 최신 지점(현재) 강조 레이블
@@ -139,6 +152,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
