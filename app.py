@@ -123,20 +123,20 @@ else:
         ))
 
         # 화살표 추가 (직전 데이터 -> 최신 데이터 방향)
-        if len(region_df) > 1:
-            prev_row = region_df.iloc[-2]
-            fig.add_annotation(
-                x=last_row['매매지수'], y=last_row['전세지수'],
-                ax=prev_row['매매지수'], ay=prev_row['전세지수'],
-                xref="x", yref="y", axref="x", ayref="y",
-                showarrow=True, arrowhead=3, arrowsize=1.5, arrowwidth=2.5,
-                arrowcolor=color_map.get(region)
-            )
+        #if len(region_df) > 1:
+        #    prev_row = region_df.iloc[-2]
+        #    fig.add_annotation(
+        #        x=last_row['매매지수'], y=last_row['전세지수'],
+        #        ax=prev_row['매매지수'], ay=prev_row['전세지수'],
+        #        xref="x", yref="y", axref="x", ayref="y",
+        #        showarrow=True, arrowhead=3, arrowsize=1.5, arrowwidth=2.5,
+        #        arrowcolor=color_map.get(region)
+        #    )
 
         # 지역명 레이블 (최신 지점에 말풍선처럼 표시)
         fig.add_annotation(
             x=last_row['매매지수'], y=last_row['전세지수'],
-            text=f" 🚩 {region} ",
+            text=f" 최근 {region} ",
             showarrow=False,
             yshift=18,
             font=dict(size=12, color="white"),
@@ -162,3 +162,4 @@ else:
     # 데이터 요약 정보 제공
     with st.expander("데이터 요약 보기"):
         st.dataframe(df_sel_sorted)
+
