@@ -108,7 +108,7 @@ else:
         fig.add_trace(go.Scatter(
             x=[first_row['매매지수']], y=[first_row['전세지수']],
             mode='markers+text',
-            marker=dict(size=8, color='lightgrey', symbol='circle'),
+            marker=dict(size=8, color='lightgrey', symbol='triangle-up'),
             text=["시작"], textposition="bottom center",
             showlegend=False, hoverinfo='skip'
         ))
@@ -162,5 +162,6 @@ else:
     # 데이터 요약 정보 제공
     #with st.expander("데이터 요약 보기"):
     #    st.dataframe(df_sel_sorted)
+
 
 
