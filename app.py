@@ -93,34 +93,22 @@ else:
 
         # 2. 유동적 진행 화살표 추가 (중간중간 흐름 표시)
         # 데이터가 너무 많으면 지저분하므로 4개 포인트마다 화살표 생성
-        step = max(1, len(rdf) // 5) 
-        #for i in range(step, len(rdf), step):
-        #    curr = rdf.iloc[i]
-        #    prev = rdf.iloc[i-1]
-        #    
-        #    fig.add_annotation(
-        #        x=curr['매매지수'], y=curr['전세지수'],
-        #        ax=prev['매매지수'], ay=prev['전세지수'],
-        #        xref="x", yref="y", axref="x", ayref="y",
-        #        showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=1.5,
-        #        arrowcolor=reg_color, opacity=0.8
-        #    )
-        for i in range(1, len(rdf)):
-            curr = rdf.iloc[i]
-            prev = rdf.iloc[i-1]
+        if len(rdf) > 1:
+            last_point = rdf.iloc[-1]
+            prev_point = rdf.iloc[-2]
             
             fig.add_annotation(
-                x=curr['매매지수'], y=curr['전세지수'],
-                ax=prev['매매지수'], ay=prev['전세지수'],
+                x=last_point['매매지수'], y=last_point['전세지수'], # 화살표 머리 (현재)
+                ax=prev_point['매매지수'], ay=prev_point['전세지수'], # 화살표 꼬리 (직전)
                 xref="x", yref="y", axref="x", ayref="y",
                 showarrow=True, 
-                arrowhead=2, 
-                arrowsize=1.0, # 모든 점에 표시하므로 크기를 약간 줄임
-                arrowwidth=1.5,
+                arrowhead=3,      # 화살표 머리 모양 (1~8)
+                arrowsize=1.5,    # 화살표 크기
+                arrowwidth=3,     # 화살표 두께 (강조를 위해 조금 두껍게 설정)
                 arrowcolor=reg_color, 
-                opacity=0.9
+                opacity=1.0       # 선명하게 표시
             )
-
+        
         # 3. 최신 지점(현재) 강조 레이블
         last = rdf.iloc[-1]
         fig.add_annotation(
@@ -151,5 +139,6 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
