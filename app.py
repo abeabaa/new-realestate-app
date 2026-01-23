@@ -94,7 +94,18 @@ else:
         # 2. 유동적 진행 화살표 추가 (중간중간 흐름 표시)
         # 데이터가 너무 많으면 지저분하므로 4개 포인트마다 화살표 생성
         step = max(1, len(rdf) // 5) 
-        for i in range(step, len(rdf), step):
+        #for i in range(step, len(rdf), step):
+        #    curr = rdf.iloc[i]
+        #    prev = rdf.iloc[i-1]
+        #    
+        #    fig.add_annotation(
+        #        x=curr['매매지수'], y=curr['전세지수'],
+        #        ax=prev['매매지수'], ay=prev['전세지수'],
+        #        xref="x", yref="y", axref="x", ayref="y",
+        #        showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=1.5,
+        #        arrowcolor=reg_color, opacity=0.8
+        #    )
+        for i in range(1, len(rdf)):
             curr = rdf.iloc[i]
             prev = rdf.iloc[i-1]
             
@@ -102,15 +113,19 @@ else:
                 x=curr['매매지수'], y=curr['전세지수'],
                 ax=prev['매매지수'], ay=prev['전세지수'],
                 xref="x", yref="y", axref="x", ayref="y",
-                showarrow=True, arrowhead=2, arrowsize=1.2, arrowwidth=1.5,
-                arrowcolor=reg_color, opacity=0.8
+                showarrow=True, 
+                arrowhead=2, 
+                arrowsize=1.0, # 모든 점에 표시하므로 크기를 약간 줄임
+                arrowwidth=1.5,
+                arrowcolor=reg_color, 
+                opacity=0.9
             )
 
         # 3. 최신 지점(현재) 강조 레이블
         last = rdf.iloc[-1]
         fig.add_annotation(
             x=last['매매지수'], y=last['전세지수'],
-            text=f"<b>{region} (현재)</b>",
+            text=f"<b>{region} (최근)</b>",
             showarrow=False, yshift=15,
             font=dict(color="white", size=11),
             bgcolor=reg_color, borderpad=4, opacity=1
@@ -136,4 +151,5 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
