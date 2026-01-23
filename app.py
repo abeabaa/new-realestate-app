@@ -136,7 +136,7 @@ else:
         # 지역명 레이블 (최신 지점에 말풍선처럼 표시)
         fig.add_annotation(
             x=last_row['매매지수'], y=last_row['전세지수'],
-            text=f" 최근 {region} ",
+            text=f" [최근]{region} ",
             showarrow=False,
             yshift=18,
             font=dict(size=12, color="white"),
@@ -160,6 +160,7 @@ else:
     st.plotly_chart(fig, use_container_width=True)
 
     # 데이터 요약 정보 제공
-    with st.expander("데이터 요약 보기"):
-        st.dataframe(df_sel_sorted)
+    #with st.expander("데이터 요약 보기"):
+    #    st.dataframe(df_sel_sorted)
+
 
