@@ -59,16 +59,19 @@ color_map = {reg: st.sidebar.color_picker(f"{reg}", px.colors.qualitative.Plotly
              for i, reg in enumerate(selected_regions)}
 
 # --- 메인 화면 ---
-col1_main, col2_main = st.columns([1.5, 8.5])
-with col1_main:
-    try:
-        st.image(logo_image_path, use_container_width=True) # 로고 이미지 표시
-    except Exception as e:
-        st.error(f"로고 파일을 불러올 수 없습니다: {e}")
-        st.info(f"`{logo_image_path}` 파일이 현재 폴더에 있는지 확인해주세요.")
-with col2_main:
-    st.title("부동산 매매/전세 가격 경로 분석")
-#st.title("부동산 매매/전세 가격 경로 분석")
+col1, col2 = st.columns([1, 8]) 
+
+with col1:
+    try:
+        # width 대신 use_container_width를 사용하면 컬럼 너비에 맞춰 로고가 들어갑니다.
+        st.image(logo_image_path, use_container_width=True) 
+    except Exception as e:
+        # 로고 파일이 없을 경우 대비 (텍스트 등으로 대체)
+        st.write("🖼️ LOGO")
+
+with col2:
+    # 제목의 위아래 여백을 맞추기 위해 마크다운을 사용하거나 직접 title을 씁니다.
+    st.title("부동산 매매/전세 가격 경로 분석")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
@@ -171,5 +174,6 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
