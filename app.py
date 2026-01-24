@@ -71,7 +71,7 @@ with col1:
 
 with col2:
     # 제목의 위아래 여백을 맞추기 위해 마크다운을 사용하거나 직접 title을 씁니다.
-    st.title("부동산 매매/전세 가격 경로 분석")
+    st.title("작부동산 매전지수 4분면")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
@@ -174,6 +174,7 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
 
 
