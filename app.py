@@ -68,7 +68,7 @@ with col1_main:
         st.info(f"`{logo_image_path}` 파일이 현재 폴더에 있는지 확인해주세요.")
 with col2_main:
     st.title("부동산 매매/전세 가격 경로 분석")
-st.title("부동산 매매/전세 가격 경로 분석")
+#st.title("부동산 매매/전세 가격 경로 분석")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
@@ -171,4 +171,5 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
 
