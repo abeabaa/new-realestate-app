@@ -59,10 +59,10 @@ color_map = {reg: st.sidebar.color_picker(f"{reg}", px.colors.qualitative.Plotly
              for i, reg in enumerate(selected_regions)}
 
 # --- 메인 화면 ---
-col1_main, col2_main = st.columns([1, 10])
+col1_main, col2_main = st.columns([1.5, 8.5])
 with col1_main:
     try:
-        st.image(logo_image_path, width=700) # 로고 이미지 표시
+        st.image(logo_image_path, use_container_width=True) # 로고 이미지 표시
     except Exception as e:
         st.error(f"로고 파일을 불러올 수 없습니다: {e}")
         st.info(f"`{logo_image_path}` 파일이 현재 폴더에 있는지 확인해주세요.")
@@ -171,3 +171,4 @@ else:
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
