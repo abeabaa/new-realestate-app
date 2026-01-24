@@ -1,83 +1,62 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 # --- 페이지 기본 설정 ---
 st.set_page_config(
-    page_title="부동산 지수 4분면 분석",
-    page_icon="✒️",
-    layout="wide"
+    page_title="부동산 지수 4분면 분석",
+    page_icon="",
+    layout="wide"
 )
 
-# --- 데이터 로딩 및 전처리 ---
-# @st.cache_data: 데이터 로딩을 캐싱하여 앱 속도를 향상시킵니다.
 @st.cache_data
 def load_data(file_path):
-    """엑셀 파일을 로드하고 데이터를 전처리하는 함수"""
-    try:
-        # '3.매매지수', '4.전세지수' 시트를 읽습니다.
-        sale = pd.read_excel(file_path, sheet_name="3.매매지수", skiprows=[0, 2, 3])
-        rent = pd.read_excel(file_path, sheet_name="4.전세지수", skiprows=[0, 2, 3])
-    except FileNotFoundError:
-        st.error(f"'{file_path}' 파일을 찾을 수 없습니다. app.py와 같은 폴더에 엑셀 파일을 넣어주세요.")
-        st.stop()
-    except Exception as e:
-        st.error(f"엑셀 파일을 읽는 중 오류가 발생했습니다. 시트 이름('3.매매지수', '4.전세지수')을 확인해주세요. 오류: {e}")
-        st.stop()
+    try:
+        sale = pd.read_excel(file_path, sheet_name="3.매매지수", skiprows=[0, 2, 3])
+        rent = pd.read_excel(file_path, sheet_name="4.전세지수", skiprows=[0, 2, 3])
+    except Exception as e:
+        st.error(f"오류 발생: {e}")
+        st.stop()
 
-    sale = sale.dropna(subset=['구분'])
-    sale[:] = sale[:].fillna(0).infer_objects(copy=False)
-    rent[:] = rent[:].fillna(0).infer_objects(copy=False)
+    sale = sale.dropna(subset=['구분'])
+    sale[:] = sale[:].fillna(0).infer_objects(copy=False)
+    rent[:] = rent[:].fillna(0).infer_objects(copy=False)
 
-    sale.rename(columns={'구분': '날짜'}, inplace=True)
-    rent.rename(columns={'구분': '날짜'}, inplace=True)
+    sale.rename(columns={'구분': '날짜'}, inplace=True)
+    rent.rename(columns={'구분': '날짜'}, inplace=True)
 
-    sale_melt = sale.melt(id_vars=['날짜'], var_name='지역', value_name='매매지수')
-    rent_melt = rent.melt(id_vars=['날짜'], var_name='지역', value_name='전세지수')
+    sale_melt = sale.melt(id_vars=['날짜'], var_name='지역', value_name='매매지수')
+    rent_melt = rent.melt(id_vars=['날짜'], var_name='지역', value_name='전세지수')
 
-    df = pd.merge(sale_melt, rent_melt, on=['날짜', '지역'])
-    df['날짜'] = pd.to_datetime(df['날짜'])
-    return df
+    df = pd.merge(sale_melt, rent_melt, on=['날짜', '지역'])
+    df['날짜'] = pd.to_datetime(df['날짜'])
+    return df
 
-# --- ⚙️ 중요: 파일 경로를 상대 경로로 변경 ---
-# 로컬 컴퓨터 경로 대신 파일 이름만 사용합니다.
 file_path = "주간시계열.xlsx"
-logo_image_path = "jak_logo.png" # 로고 파일 경로
+logo_image_path = "jak_logo.png" 
 df = load_data(file_path)
 
-# --- 사이드바 (사용자 입력 UI) ---
-st.sidebar.header("🗓️ 필터를 선택하세요")
-
-# 1. 날짜 범위 선택 위젯
+# --- 사이드바 ---
+st.sidebar.header("🗓️ 필터")
 selected_dates = st.sidebar.date_input(
-    "날짜 범위",
-    value=(df["날짜"].min(), df["날짜"].max()),
-    min_value=df["날짜"].min(),
-    max_value=df["날짜"].max(),
+    "날짜 범위",
+    value=(df["날짜"].min(), df["날짜"].max()),
+    min_value=df["날짜"].min(),
+    max_value=df["날짜"].max(),
 )
 
 if len(selected_dates) != 2:
-    st.sidebar.error("날짜 범위를 올바르게 선택해주세요.")
-    st.stop()
+    st.sidebar.error("날짜 범위를 선택하세요.")
+    st.stop()
 start_date, end_date = selected_dates
 
-# 2. 지역 선택 위젯
 all_regions = df["지역"].unique()
-selected_regions = st.sidebar.multiselect(
-    "지역 선택",
-    options=all_regions,
-    default=all_regions[:5] # 기본값: 처음 5개 지역 선택
-)
+selected_regions = st.sidebar.multiselect("지역 선택", options=all_regions, default=all_regions[:3])
 
-# --- 🎨 사용자 색상 선택 기능 ---
-st.sidebar.header("🎨 색상을 지정하세요")
-color_map = {}
-# 사용자가 선택한 각 지역에 대해 색상 선택 위젯을 동적으로 생성합니다.
-for region in selected_regions:
-    # st.color_picker는 사용자가 색상을 고를 수 있는 위젯입니다.
-    default_color = '#000000' # 기본값은 검은색으로 설정
-    selected_color = st.sidebar.color_picker(f"'{region}' 색상", default_color)
-    color_map[region] = selected_color # 딕셔너리에 '지역:선택된 색상'을 저장합니다.
+st.sidebar.header("🎨 색상")
+color_map = {reg: st.sidebar.color_picker(f"{reg}", px.colors.qualitative.Plotly[i%10]) 
+             for i, reg in enumerate(selected_regions)}
 
 # --- 메인 화면 ---
 col1_main, col2_main = st.columns([1, 10])
@@ -89,53 +68,106 @@ with col1_main:
         st.info(f"`{logo_image_path}` 파일이 현재 폴더에 있는지 확인해주세요.")
 with col2_main:
     st.title("부동산 매매/전세 가격 경로 분석")
+st.title("부동산 매매/전세 가격 경로 분석")
 
 # --- 데이터 필터링 ---
 mask = (df["날짜"] >= pd.to_datetime(start_date)) & \
-       (df["날짜"] <= pd.to_datetime(end_date)) & \
-       (df["지역"].isin(selected_regions))
-df_sel = df[mask]
+       (df["날짜"] <= pd.to_datetime(end_date)) & \
+       (df["지역"].isin(selected_regions))
+df_sel = df[mask].sort_values(['지역', '날짜'])
 
-# --- 그래프 시각화 ---
 if df_sel.empty:
-    st.warning("선택한 조건에 맞는 데이터가 없습니다. 다른 필터를 선택해주세요.")
+    st.warning("데이터가 없습니다.")
 else:
-    # 경로 플롯을 그리기 위해 날짜순으로 정렬
-    df_sel_sorted = df_sel.sort_values(by='날짜')
+    # 기본 라인 차트 생성
+    fig = go.Figure()
 
-    # px.line으로 경로 그래프 그리기
-    fig = px.line(
-        df_sel_sorted,
-        x="매매지수",
-        y="전세지수",
-        color="지역",
-        markers=True,
-        hover_data=['날짜', '지역'],
-        color_discrete_map=color_map # 사용자가 선택한 색상 맵 적용
-    )
+    for region in selected_regions:
+        rdf = df_sel[df_sel['지역'] == region]
+        if rdf.empty: continue
+        
+        reg_color = color_map.get(region, "black")
 
-    # 경로 마지막에 지역명 표시
-    last_points = df_sel_sorted.loc[df_sel_sorted.groupby('지역')['날짜'].idxmax()]
-    
-    for index, row in last_points.iterrows():
-        fig.add_annotation(
-            x=row['매매지수'],
-            y=row['전세지수'],
-            text=f"<b>{row['지역']}</b>",
-            showarrow=False,
-            yshift=12,
-            font=dict(size=12, color="black"),
-            bgcolor="rgba(255, 255, 255, 0.7)"
+        # 1. 경로 선 추가
+        fig.add_trace(go.Scatter(
+            x=rdf['매매지수'], y=rdf['전세지수'],
+            mode='lines+markers',
+            name=region,
+            line=dict(color=reg_color, width=2),
+            marker=dict(size=4, opacity=0.5),
+            hoverinfo='text',
+            text=[f"{region}<br>{d.strftime('%Y-%m-%d')}<br>매매:{s}<br>전세:{r}" 
+                  for d, s, r in zip(rdf['날짜'], rdf['매매지수'], rdf['전세지수'])]
+        ))
+
+        # 2. 유동적 진행 화살표 추가 (중간중간 흐름 표시)
+        #if len(rdf) > 1:
+        #    last_point = rdf.iloc[-1]
+        #    prev_point = rdf.iloc[-2]
+        #    
+        #    # 실제 데이터의 방향(기울기) 계산
+        #    dx = last_point['매매지수'] - prev_point['매매지수']
+        #    dy = last_point['전세지수'] - prev_point['전세지수']
+        #    
+        #    # 화살표가 너무 작아 보이지 않도록 방향 벡터 정규화 (길이 고정)
+        #    import numpy as np
+        #    mag = np.sqrt(dx**2 + dy**2)
+        #    if mag != 0:
+        #        # 픽셀 단위로 화살표 길이를 약 30~40 정도로 고정
+        #        ax_val = -(dx / mag) * 40 
+        #        ay_val = (dy / mag) * 40  # Plotly의 ay는 위쪽이 마이너스이므로 방향 반전
+        #    else:
+        #        ax_val, ay_val = 0, 0
+
+        #    fig.add_annotation(
+        #        x=last_point['매매지수'], y=last_point['전세지수'],
+        #        ax=ax_val, ay=ay_val,  # 이제 ax, ay는 좌표가 아니라 픽셀 거리입니다.
+        #        xref="x", yref="y",
+        #        axref="pixel", ayref="pixel", # 픽셀 기준으로 고정
+        #        showarrow=True, 
+        #        arrowhead=3, 
+        #        arrowsize=20, 
+        #        arrowwidth=0.1,
+        #        arrowcolor=reg_color
+        #    )
+        
+        # 3. 최신 지점(현재) 강조 레이블
+        last = rdf.iloc[-1]
+        fig.add_annotation(
+            x=last['매매지수'], y=last['전세지수'],
+            text=f"<b>{region} (최근)</b>",
+            showarrow=False, yshift=15,
+            font=dict(color="white", size=11),
+            bgcolor=reg_color, borderpad=4, opacity=1
+        )
+
+        # 5. 종료 지점(가장 최근 날짜) 표시
+        last = rdf.iloc[-1]
+        fig.add_trace(go.Scatter(
+            x=[last['매매지수']], y=[last['전세지수']],
+            mode='markers+text',
+            text=["recent"], # 또는 "현재"
+            textposition="top center", # 시작점(bottom)과 겹치지 않게 위쪽으로 설정
+            marker=dict(color=reg_color, size=10, symbol="circle"), # 지역 색상을 그대로 사용
+            showlegend=False
+        ))
+
+        first = rdf.iloc[0]
+        fig.add_trace(go.Scatter(
+            x=[first['매매지수']], y=[first['전세지수']],
+            mode='markers+text',
+            text=["START"], textposition="bottom center",
+            marker=dict(color="grey", size=8, symbol="circle"),
+            showlegend=False
+        ))
+
+    # 레이아웃 설정
+    fig.update_layout(
+        title=f"부동산 지수 경로 분석 ({start_date} ~ {end_date})",
+        xaxis_title="매매지수", yaxis_title="전세지수",
+        template="plotly_white",
+        height=700,
+        hovermode="closest"
     )
-    # 그래프 레이아웃 설정
-    fig.update_layout(
-        title=f"부동산 4분면 지수 경로 ({start_date.strftime('%Y-%m-%d')} ~ {end_date.strftime('%Y-%m-%d')})",
-        xaxis_title="매매지수",
-        yaxis_title="전세지수",
-        height=700,
-        legend_title="지역",
-        showlegend=True # 색상을 직접 지정하므로 범례를 다시 표시합니다.
-    )
 
-    # Streamlit에 그래프 표시
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
